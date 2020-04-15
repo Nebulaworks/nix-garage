@@ -1,0 +1,67 @@
+#! /usr/bin/env bash
+# vim: ft=sh sw=2 et
+# shellcheck shell=bash 
+#
+# Inspired by: https://vaibhavsagar.com/blog/2018/05/27/quick-easy-nixpkgs-pinning/
+
+set -eufo pipefail
+
+REPO='nixpkgs-channels'
+OWNER='NixOS'
+ITER='0'
+
+# shellcheck disable=SC2148
+usage(){
+  cat << EOF
+usage: $(basename "$0") [OPTIONS] ARGS
+
+Generate pins from nix channels
+
+OPTIONS:
+  -h      Show this message
+  -i      set iteration
+
+EXAMPLES:
+  Generate nix pin from nixos-20-03 branch:
+
+      $(basename "$0") nixos-20-03
+
+EOF
+}
+
+while getopts "hi:" OPTION
+do
+  case $OPTION in
+    i )
+      ITER=$OPTARG
+      ;;
+    h )
+      usage
+      exit 0
+      ;;
+    \? )
+      usage
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND -1))
+
+GITREF=${1:-'nixos-unstable'}
+PINOUT="./pins/${GITREF}_${ITER}.json"
+
+test -f $PINOUT && echo "$PINOUT already exists" && exit 1
+
+APIRESP=$(curl "https://api.github.com/repos/$OWNER/$REPO/branches/$GITREF" | jq -r '.')
+REVDATE=$(echo ${APIRESP} | jq -r '.commit.commit.author.date')
+REV=$(echo ${APIRESP} | jq -r '.commit.sha')
+
+SHA256=$(nix-prefetch-url --unpack "https://github.com/$OWNER/$REPO/archive/$REV.tar.gz")
+JQOUT=$(jq -n '{url: $url, rev: $rev, date: $date,  sha256: $sha256, fetchSubmodules: false, deepClone: false, leaveDotGit: false}' \
+  --arg url "https://github.com/$OWNER/$REPO.git" \
+  --arg repo "$REPO" \
+  --arg date "$REVDATE" \
+  --arg rev "$REV" \
+  --arg sha256 "$SHA256" )
+[[ $? == 0 ]] && echo "${JQOUT}" >| ${PINOUT}
+echo Done.
