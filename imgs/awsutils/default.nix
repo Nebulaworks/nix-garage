@@ -2,13 +2,14 @@
 
 let
   pkgs = import ../../pin { snapshot = "nixos-20-03_0"; };
-
+  lib = pkgs.lib;
+  mypkgs = [ pkgs.coreutils pkgs.bash pkgs.jq pkgs.curl pkgs.awscli ];
 in pkgs.dockerTools.buildImage {
   name = "nebulaworks/awsutils";
-  # Doesnt matter since we will use the derivation
-  # when publishing to image registry
+  # Doesnt matter will use the derivation
+  # when publishing to registry
   tag = "latest";
-  contents = [ pkgs.coreutils pkgs.bash pkgs.jq pkgs.curl pkgs.awscli ];
+  contents = mypkgs;
   extraCommands = ''
       # make sure /tmp exists
       mkdir -m 1777 tmp
@@ -17,6 +18,8 @@ in pkgs.dockerTools.buildImage {
     Env = [ 
       "PATH=/bin/"
     ];
+    Label = { "com.nebulaworks.packages" = lib.strings.concatStringsSep "," (lib.lists.naturalSort (lib.lists.forEach mypkgs (x: lib.strings.getName x + ":" + lib.strings.getVersion x )));
+    }; 
     WorkingDir = "/";
   };
 }
