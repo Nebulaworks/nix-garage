@@ -1,4 +1,4 @@
-with import ./pin { snapshot = "nixos-20-03_0"; };
+with import ./pin { snapshot = "nixos-unstable_0"; };
 
 mkShell {
   buildInputs = [
