@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# vim: ft=sh sw=2 et
+# shellcheck shell=bash
+set -efo pipefail
+
+test -z $1 && (echo "pass in img" && exit 1)
+
+IMG_DIR="imgs/$1"
+
+# Make sure nix-build was run
+test -f ${IMG_DIR}/result || (echo "please build derivation" && exit 1)
+
+derivation=$(nix show-derivation $(nix-instantiate ${IMG_DIR}/default.nix))
+registry="docker.io"
+image_fullname=$(echo $derivation | jq -r '.[] | .env.imageName')
+org=$(echo $image_fullname | cut -d '/' -f 1)
+image_name=$(echo $image_fullname | cut -d '/' -f 2)
+calcout=$(echo $derivation | jq '.[] | .env.out')
+calcout=$(basename ${calcout} | cut -d '-' -f1)
+registry_endpoint="${registry}/${org}/${image_name}:${calcout}"
+
+# Check if this image is already in the registry
+skopeo inspect docker://${registry_endpoint} && exit 0
+
+skopeo copy docker-archive:result docker://${registry_endpoint}
