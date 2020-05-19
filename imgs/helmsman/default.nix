@@ -2,7 +2,7 @@
 
 let
   nwi = import ../../nwi.nix;
-  pkgs = import ../../pin { snapshot = "nixos-unstable_0"; };
+  pkgs = import ../../pin { snapshot = "nixpkgs-unstable_0"; };
   lib = pkgs.lib;
   contents = [ pkgs.bash pkgs.helmsman pkgs.jq pkgs.awscli ];
 in pkgs.dockerTools.buildImage {
