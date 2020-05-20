@@ -3,8 +3,14 @@
 let
   nwi = import ../../nwi.nix;
   pkgs = import ../../pin { snapshot = "nixpkgs-unstable_0"; };
+  callPackage = pkgs.lib.callPackageWith (pkgs // self);
+
+  self = {
+      helm-diff = callPackage ./pkgs/helm-diff { };
+  };
+
   lib = pkgs.lib;
-  contents = [ pkgs.bash pkgs.helmsman pkgs.jq pkgs.awscli ];
+  contents = [ pkgs.coreutils pkgs.bash self.helm-diff pkgs.helmsman pkgs.kubernetes-helm pkgs.kubectl pkgs.jq pkgs.awscli ];
 in pkgs.dockerTools.buildImage {
   inherit contents;
   name = "nebulaworks/helmsman-aws";
