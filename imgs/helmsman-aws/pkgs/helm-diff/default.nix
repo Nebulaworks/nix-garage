@@ -14,6 +14,12 @@ buildGoPackage rec {
   goPackagePath = "github.com/databus23/helm-diff";
   goDeps = ./deps.nix;
 
+  postInstall = ''
+    mkdir -p $out/share/helm/plugins/helm-diff/bin/
+    cp $src/plugin.yaml $out/share/helm/plugins/helm-diff/
+    ln -s $out/bin/helm-diff $out/share/helm/plugins/helm-diff/bin/diff
+  '';
+
   meta = with lib; {
     description = "Helm plugin that generates a diff and previews what a helm upgrade would change";
     homepage = "https://github.com/databus23/helm-diff";

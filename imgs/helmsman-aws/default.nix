@@ -24,6 +24,7 @@ in pkgs.dockerTools.buildImage {
   config = {
     Env = [ 
       "PATH=/bin/"
+      "HELM_PLUGINS=/share/helm/plugins/"
     ];
     Labels = {
       "com.nebulaworks.packages" = lib.strings.concatStringsSep "," (lib.lists.naturalSort (lib.lists.forEach contents (x: lib.strings.getName x + ":" + lib.strings.getVersion x )));
