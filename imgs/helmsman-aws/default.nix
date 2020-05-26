@@ -10,7 +10,7 @@ let
   };
 
   lib = pkgs.lib;
-  contents = [ pkgs.coreutils pkgs.bash self.helm-diff pkgs.helmsman pkgs.kubernetes-helm pkgs.kubectl pkgs.jq pkgs.awscli ];
+  contents = [ pkgs.coreutils pkgs.bash pkgs.cacert self.helm-diff pkgs.helmsman pkgs.kubernetes-helm pkgs.kubectl pkgs.jq pkgs.awscli ];
 in pkgs.dockerTools.buildImage {
   inherit contents;
   name = "nebulaworks/helmsman-aws";
