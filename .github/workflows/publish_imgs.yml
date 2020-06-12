@@ -1,0 +1,134 @@
+# nix-garage GitHub Actions Workflow for publishing images to Docker Hub
+
+### Workflow
+# 1. We want this to be ran manually i.e. with a comment in a PR. To do this, we can have a release process where we update what is currently out in prod via a PR
+# 2. Once the PR is made, we then have someone (who is an approver) comment in the PR "Publish Images" (WIP)
+# 3. GitHub Actions will detect this comment being made, and check if the comment was made by an approved person, alongside what they commented.
+# 4. If it matches, we fire off this job, where we log into docker.io with nwiauto (also pass in the password via a secret declared in the repo)
+# 5. Once we logged in, we then execute the script "publish-imgs", which will publish the image passed into it.
+# 6. If successful, the job will create a new PR comment saying all of the images that were published as well as a link to the page with all of the images
+
+name: Publish Docker Images
+
+on:
+  # This job will be fired off when a comment has been made in an issue (which also impliitly includes PRs)
+  issue_comment:
+    types: [created]
+
+jobs:
+  verify:
+    name: Verify Commenter    
+    runs-on: ubuntu-18.04
+
+    # Checks if the comment contains the word 'publish as well as if the comment was made in a PR
+    if: > 
+      startsWith(github.event.comment.body, 'publish')
+      && startsWith(github.event.issue.pull_request.url, 'https://')
+    outputs:
+      status: ${{ steps.verify.outputs.status }}
+    
+    steps:
+      # Verifies if the commenter is an approver, otherwise, the job will output an error
+      - name: Verify that Commenter is Approver
+        id: verify
+        run: |
+          set -x
+          is_approver=$(curl -sSf \
+          --url https://api.github.com/orgs/Nebulaworks/teams/approvers/memberships/${{ github.event.comment.user.login }} \
+          --header 'Authorization: Bearer ${{ secrets.NWIAUTO_PAT }}' \
+          --header 'Content-Type: application/json' | jq -r '.state' \
+          )
+
+          if [ $is_approver == "active" ]; then
+            echo ::set-output name=status::success
+          else
+            echo ::set-output name=status::failure
+          fi
+        continue-on-error: true
+
+  publish:
+    name: Prepare and Publish Images
+    runs-on: ubuntu-18.04
+    needs: verify
+
+    # Only runs if the status from the verify stage passed
+    if: needs.verify.outputs.status == 'success'
+    outputs:
+      allImgs: ${{ steps.publish.outputs.allImgs }}
+
+    # Utilizing nixos/nix docker image v2.3
+    container:
+      image: nixos/nix@sha256:af330838e838cedea2355e7ca267280fc9dd68615888f4e20972ec51beb101d8
+    
+    steps:
+      # Checks out repository to docker container
+      - name: Pulls Repository Code
+        uses: actions/checkout@v2
+
+      # Attempt to authenticatie to Docker hub and publish all images
+      - name: Authenticate and Execute Publish Script
+        id: publish
+        run: |
+          set -x
+          cat << EOF > $GITHUB_WORKSPACE/auth.json
+          {
+            "auths": {
+              "https://index.docker.io/v1/": {
+                "auth": "$(echo -n 'nwiauto:${{ secrets.USER_PASSWORD }}' | base64)"
+              }
+            }
+          }
+          EOF
+          export REGISTRY_AUTH_FILE=$GITHUB_WORKSPACE/auth.json
+
+          cd $GITHUB_WORKSPACE
+          allImgs=""          
+          for currImgPath in $(ls -d $GITHUB_WORKSPACE/imgs/*/); do 
+            currImgName=$(basename $currImgPath)
+            if [ -z $allImgs ]; then
+              allImgs="$currImgName"
+            else
+              allImgs="$allImgs, $currImgName"
+            fi
+
+            nix-shell --run "cd ./imgs/$currImgName && nix-build"
+            cp $GITHUB_WORKSPACE/imgs/$currImgName/result $GITHUB_WORKSPACE/result
+            nix-shell --run "./publish-imgs $currImgName"
+          done
+          echo ::set-output name=allImgs::$allImgs
+        continue-on-error: false
+
+  post:
+    name: Generate PR Comments
+    runs-on: ubuntu-18.04
+    needs: [verify, publish]
+
+    steps:
+
+      # Creates a PR comment telling commenter to ask an approved user to pubish images
+      - name: Create Failure PR Comment for Verifying
+        if: needs.verify.outputs.status == 'failure'
+        uses: jungwinter/comment@5acbb   # SHA ref v1.0.2
+        with:
+          type: create
+          body: |
+            User `${{ github.event.comment.user.login }}` is not authorized to publish images from this repository.
+            
+            Comment with a mention to `nebulaworks/approvers` to notify the approvers team to publishing the new Docker images.
+          token: ${{ secrets.NWIAUTO_PAT }}
+          issue_number: ${{ github.event.issue.number }}
+        continue-on-error: false
+
+      # Creates a PR comment showing commenter images that were built as well as a link to the page where they currently exist
+      - name: Create Success PR Comment
+        if: needs.verify.outputs.status == 'success' && needs.publish.result == 'success'
+        uses: jungwinter/comment@5acbb  # SHA ref v1.0.2
+        with:
+          type: create
+          body: |
+            The following docker images: 
+            ${{ needs.publish.outputs.allImgs }}
+            have been published on [Docker Hub](https://hub.docker.com/u/nebulaworks).
+          token: ${{ secrets.NWIAUTO_PAT }}
+          issue_number: ${{ github.event.issue.number }}
+        continue-on-error: false
