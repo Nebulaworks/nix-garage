@@ -1,0 +1,52 @@
+# This yml handles linting nix configs for each PR
+### Workflow
+# 1. Developer writes nix configs
+# 2. Developer pushes code up to fork and opens new PR
+# 3. This job kicks off, verifying the new configuration they added
+# 4. If the job suceeds, the PR is allowed to be merged. If not, the PR is unable to be merged
+
+name: Lint Nix Configs
+on: pull_request
+
+jobs:
+  linter:
+    name: Run nixpkgs-fmt
+    runs-on: ubuntu-18.04
+
+    # nixos/nix docker image v2.3 SHA
+    container:
+      image: nixos/nix@sha256:af330838e838cedea2355e7ca267280fc9dd68615888f4e20972ec51beb101d8
+
+    steps:
+      - name: Pulls Repository
+        uses: actions/checkout@v2
+      
+        # Parses through all nix files using nixpkgs-fmt, outputting the diff
+        # between the modded one and original if one of the new nix configs are not properly formatted
+        # NOTE: When using `diff` in GitHub Actions, it causes script to forcibly exit, so workaround is to
+        # unset e so that the script will "ignore" whatever return value is leaking in the diff command
+      - name: Verify Nix Configs
+        id: format
+        run: |
+          cd $GITHUB_WORKSPACE
+          has_failed="false"
+          for file_path in $(find . -name "*.nix"); do
+            fmt_file_path="${file_path%.*}_fmt.nix"
+            nix-shell --run "cat $file_path | nixpkgs-fmt > $fmt_file_path" 
+
+            set +e
+            differences=$(diff $file_path $fmt_file_path)
+            set -e
+
+            if [ ! -z "$differences" ]; then
+              printf "\n$differences\n"
+              has_failed="true"
+            else
+              printf "$file_path passed formatting check.\n" 
+            fi
+          done
+          if [ "$has_failed" == "true" ]; then
+            echo "::error ::Some nix configs were not properly formatted beforehand with nixpkgs-fmt."
+            exit 1
+          fi
+        continue-on-error: false
