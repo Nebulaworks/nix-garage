@@ -6,9 +6,9 @@ python3Packages.buildPythonPackage rec {
 
   # This is on my own fork but will bring this into NWI org in a followup
   src = fetchFromGitHub {
-    owner  = "sarcasticadmin";
-    rev    = "1edd490a7d36727d2f9b0846fd3536f7b1baba45";
-    repo   = "flaskapp";
+    owner = "sarcasticadmin";
+    rev = "1edd490a7d36727d2f9b0846fd3536f7b1baba45";
+    repo = "flaskapp";
     sha256 = "1dmmg79lp0dr2sy9drrpj7k1bbs53awwqqckdyfjxvl0fj7pfmkb";
   };
 
