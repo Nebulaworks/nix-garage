@@ -5,5 +5,6 @@ mkShell {
     bash
     jq
     skopeo
+    nixpkgs-fmt
   ];
 }
