@@ -3,7 +3,7 @@ let
   nwi = import ../../nwi.nix;
   pkgs = import ../../pin { snapshot = "nixos-20-03_0"; };
   lib = pkgs.lib;
-  contents = [ pkgs.coreutils pkgs.bash pkgs.jq pkgs.curl pkgs.awscli ];
+  contents = with pkgs; [ cacert coreutils bash jq curl awscli ];
 in
 pkgs.dockerTools.buildImage {
   inherit contents;
@@ -18,6 +18,7 @@ pkgs.dockerTools.buildImage {
   config = {
     Env = [
       "PATH=/bin/"
+      "SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt"
     ];
     Labels = {
       "com.nebulaworks.packages" = lib.strings.concatStringsSep "," (lib.lists.naturalSort (lib.lists.forEach contents (x: lib.strings.getName x + ":" + lib.strings.getVersion x)));
