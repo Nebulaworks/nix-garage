@@ -3,7 +3,7 @@ let
   nwi = import ../../nwi.nix;
   pkgs = import ../../pin { snapshot = "nixos-20-03_0"; };
   lib = pkgs.lib;
-  contents = [ pkgs.coreutils pkgs.bash pkgs.jq pkgs.curl pkgs.awscli ];
+  contents = with pkgs; [ cacert coreutils bash jq curl awscli ];
 in
 pkgs.dockerTools.buildImage {
   inherit contents;
