@@ -18,8 +18,13 @@ jobs:
       image: nixos/nix@sha256:af330838e838cedea2355e7ca267280fc9dd68615888f4e20972ec51beb101d8
 
     steps:
+        # Checks out repository to docker container
+        # Utilizes the commit from the open PR
+        # Using SHA v2
       - name: Pulls Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@28c7f3d2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
       
         # Parses through all nix files using nixpkgs-fmt, outputting the diff
         # between the modded one and original if one of the new nix configs are not properly formatted
