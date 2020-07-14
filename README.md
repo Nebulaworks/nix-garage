@@ -7,6 +7,7 @@ Nebulaworks Engineering use of [nixpkgs](https://github.com/NixOS/nixpkgs)
 * [Container Images](./imgs/README.md)
 * [Publishing](./PUBLISHING.md)
 * [iso Configs](./isos/README.md)
+* [Templates](./templates/README.md)
 
 ## Building Nix Configurations
 While there are numerous ways of building Nix configurations, one way to build nix configs in a non-linux environment is leveraging a Docker container. The general command for this approach is:
