@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# vim: ft=sh sw=2 et
+# shellcheck shell=bash
+set -efo pipefail
+
+# A Bash script that automates creating a Docker Hub Repository, if applicable. Also adds an org group, engineering, to have read/write access to said repo if applicable
+
+#### Requires the following parameters to be passed in from the CLI:
+# Docker Hub API Token = $1
+# User/Org name = $2
+# Repo name = $3
+
+# Checks if required values are passed in
+test -z $1 && (echo "Script needs a token towards Docker Hub!" && exit 1)
+test -z $2 && (echo "Script needs a user/org that exists in Docker Hub!" && exit 1)
+test -z $3 && (echo "Script needs a repo name to verify/use!" && exit 1)
+
+REPO_EXISTS_CODE=$(curl --write-out %{response_code} --output /dev/null -s \
+    -H "Content-Type: application/json" -H "Authorization: JWT $1" \
+    --url https://hub.docker.com/v2/repositories/$2/$3/)
+
+if [ $REPO_EXISTS_CODE -ne 200 ]; then
+    echo "Docker Hub repo $3 does not exist in $2, creating now..."
+    tmpdata=$(mktemp --suffix ".json" -t repo_data_XXXXXXX)
+    cat << EOF > $tmpdata
+{
+    "namespace": "$2",
+    "name": "$3",
+    "description": "$(sed '2q;d' ./imgs/$3/README.md)",
+    "is_private": false
+}
+EOF
+    curl -s -H "Content-Type: application/json" -H "Authorization: JWT $1" -X POST \
+    -d @$tmpdata --url https://hub.docker.com/v2/repositories/
+    echo
+
+    # Clean up temp data
+    rm $tmpdata
+else
+    echo "Repo $3 already exists in $2. Skipping rest of script (including org perms and README addition)."
+    exit 0
+fi
+
+# We only run these next lines of code if the repo did NOT exist at first 
+ORG_RESPONSE_CODE=$(curl -s --write-out %{response_code} --output /dev/null \
+    -H "Content-Type: application/json" -H "Authorization: JWT $1" \
+    --url https://hub.docker.com/v2/orgs/$2/groups/)
+    
+if [ $ORG_RESPONSE_CODE -eq 200 ]; then
+    echo "User is actually organization, attempting to add engineering group with read/write permissions in repo $3..."
+    ENG_GROUP_ID=$(curl -s -H "Content-Type: application/json" -H "Authorization: JWT $1" \
+    --url https://hub.docker.com/v2/orgs/$2/groups/ \
+    | jq -r '.results[] | select(.name == "engineering").id')
+    VERIFY_ENG_GROUP=$(curl -s -H "Content-Type: application/json" -H "Authorization: JWT $1" \
+    --url https://hub.docker.com/v2/repositories/$2/$3/groups/ | jq --argjson id $ENG_GROUP_ID \
+    '.results[] | select(.group_id == $id)')
+
+    if [ -z $VERIFY_ENG_GROUP ]; then 
+        # Docker API mentions that permissions for repos are cumulative, meaning write also implies read
+        # https://docs.docker.com/docker-hub/orgs/#permissions-reference
+        curl -s -H "Content-Type: application/json" -H "Authorization: JWT $1" -X POST \
+        -d "{\"group_id\": \"${ENG_GROUP_ID}\",\"permission\": \"write\"}" \
+        --url https://hub.docker.com/v2/repositories/$2/$3/groups/
+        echo
+    else
+        echo "There already exists engineering group with read/write permissions on repo $3"
+    fi
+else
+    echo "User is not organization, skipping adding group permissions..."
+fi
+
+# The passed in repo will have a new full_description associated with the README.md associated in the /img/image_name/
+echo "Adding ./imgs/$3/README.md to repo..."
+RESPONSE_CODE=$(curl -s -L --write-out %{response_code} --output /dev/null -H "Authorization: JWT $1" \
+    -X PATCH --data-urlencode full_description@./imgs/$3/README.md \
+    --url https://hub.docker.com/v2/repositories/$2/$3/)
+echo "Results: $RESPONSE_CODE"

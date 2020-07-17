@@ -6,5 +6,6 @@ mkShell {
     jq
     skopeo
     nixpkgs-fmt
+    curl
   ];
 }

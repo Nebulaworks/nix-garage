@@ -31,11 +31,16 @@ c2FyY2FzdGljYWRtaW46bXlzdXBlcnNlY3JldHBhc3N3b3Jk
 ~$ export REGISTRY_AUTH_FILE=$(pwd)/auth.json
 ```
 
-2. Setup your nix-shell and publish the image that you just built. Example publishing `awsutils`:
+2. Obtain a Docker Hub Token, which can be acheived from this `curl` command (replacing $UNAME and $UPASS with your own values):
+```
+export TOKEN=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${UNAME}'", "password": "'${UPASS}'"}' https://hub.docker.com/v2/users/login/ | jq -r .token)
+```
 
+3. Setup your nix-shell and run both `create-repo` and `publish-imgs` scripts sequentially to publish the image that you just built. Example publishing `awsutils` under `nebulaworks` user:
 ```
 ~$ nix-shell
+~$ ./create-repo $TOKEN nebulaworks awsutils
 ~$ ./publish-imgs awsutils
 ```
 
-3. Done! It's now up in https://hub.docker.com/repositories/nebulaworks 
+4. Done! It's now up in https://hub.docker.com/repositories/nebulaworks 
