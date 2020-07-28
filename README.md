@@ -19,3 +19,7 @@ Command notes:
 - Mounts a shared volume from the project's root with a new folder in the container, `/build`, allowing for the contents of the container to be shared with the host and vice verse
 - `nixDockerImage` is a Docker image that has the `nix` commands preinstalled. [This](https://hub.docker.com/r/nixos/nix) is one such image that can be used.
 - `imageSHA256` is the Docker image's digest, which safely pins the image to a specific version.
+
+### Contributing
+
+Please fork this repository and open a PR to contribute to this repository

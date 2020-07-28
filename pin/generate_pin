@@ -22,9 +22,13 @@ OPTIONS:
   -i      set iteration
 
 EXAMPLES:
-  Generate nix pin from nixos-20-03 branch:
+  Generate nix pin from nixos-20.03 branch:
 
-      $(basename "$0") nixos-20-03
+      $(basename "$0") nixos-20.03
+
+  Generate another iteration from nixos-20.03 branch:
+
+      $(basename "$0") -i "1" nixos-20.03
 
 EOF
 }
