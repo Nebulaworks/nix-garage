@@ -1,5 +1,8 @@
-{ pkgs ? import <nixpkgs> {} }:
-
-rec {
-  flasksample = pkgs.callPackage ./pkgs/flasksample {};
+{ nixpkgs ? import <nixpkgs> {} }:
+let
+  pkgs = import nixpkgs.path { overlays = [ (import ./overlay.nix) ]; };
+in
+{
+  pkgs = pkgs;
+  imgs = import ./imgs { inherit pkgs; };
 }

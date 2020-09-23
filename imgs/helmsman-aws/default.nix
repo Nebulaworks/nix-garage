@@ -1,7 +1,6 @@
-{ system ? builtins.currentSystem }:
+{ system ? builtins.currentSystem, pkgs }:
 let
   nwi = import ../../nwi.nix;
-  pkgs = import ../../pin { snapshot = "nixpkgs-unstable_0"; };
   callPackage = pkgs.lib.callPackageWith (pkgs // self);
 
   self = {
