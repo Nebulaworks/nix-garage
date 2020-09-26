@@ -5,6 +5,8 @@ rec {
     pkgs = import ../pin { snapshot = "nixos-20-03_0"; };
   };
 
+  flasksample = pkgs.callPackage ./flasksample {};
+
   helmsman-aws = pkgs.callPackage ./helmsman-aws {
     pkgs = import ../pin { snapshot = "nixpkgs-unstable_0"; };
   };
