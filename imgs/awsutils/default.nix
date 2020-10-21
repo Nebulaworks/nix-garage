@@ -2,7 +2,7 @@
 let
   nwi = import ../../nwi.nix;
   lib = pkgs.lib;
-  contents = with pkgs; [ cacert coreutils bash jq curl awscli ];
+  contents = with pkgs; [ cacert coreutils bash jq curl awscli git ];
 in
 pkgs.dockerTools.buildImage {
   inherit contents;
