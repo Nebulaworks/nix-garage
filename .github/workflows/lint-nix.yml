@@ -22,7 +22,7 @@ jobs:
         # Utilizes the commit from the open PR
         # Using SHA v2
       - name: Pulls Repository
-        uses: actions/checkout@28c7f3d2
+        uses: actions/checkout@28c7f3d2b5162b5ddd3dfd9a45aa55eaf396478b
         with:
           ref: ${{ github.event.pull_request.head.sha }}
       
