@@ -60,6 +60,55 @@ $ nix-shell
  * Debug mode: off
  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
 ```
+
+## Build caching with Cachix
+
+We currently leverage Cachix as a hosted binary cache service for faster, more optimized builds.
+Regardless of your use case, you can install Cachix with the following command, assuming Nix itself
+is already installed:
+```
+nix-env -iA cachix -f https://cachix.org/api/v1/install
+```
+
+### Pulling binaries from Cachix
+
+If you wish to leverage the cache when building a derivation, simply type `cachix use nebulaworks`.
+If you're not updating an existing package or creating a brand new one, this is your use case. Once
+you've set the Cachix cache, `nix` commands will use that cache. For example, when building `sshcb`:
+```
+$ nix-build -A pkgs.sshcb
+these paths will be fetched (9.37 MiB download, 42.52 MiB unpacked):
+  /nix/store/0qrayfgw779phhbasnrynvyakpczwdkb-glibc-2.32-39
+  /nix/store/2bac51qc8jybrml27pak99f42gyhkq8b-sshcb-0.2.1
+  /nix/store/7xp1yxk8d67ik4rfcbxxjrfv6fnch0p5-iana-etc-20210225
+  /nix/store/igin5snx0ljc000yq7zgsi13nrn54yxc-libidn2-2.3.0
+  /nix/store/npay639zknanqr5bwfwwczcmhxi596z1-libunistring-0.9.10
+  /nix/store/r2wvgnr54vmwnjvzyqdixv8xbn362jgh-mailcap-2.1.48
+  /nix/store/rac7wjm9rlvbk4lv18g2jw22vyby9r3x-tzdata-2020f
+copying path '/nix/store/7xp1yxk8d67ik4rfcbxxjrfv6fnch0p5-iana-etc-20210225' from 'https://cache.nixos.org'...
+copying path '/nix/store/npay639zknanqr5bwfwwczcmhxi596z1-libunistring-0.9.10' from 'https://cache.nixos.org'...
+copying path '/nix/store/r2wvgnr54vmwnjvzyqdixv8xbn362jgh-mailcap-2.1.48' from 'https://cache.nixos.org'...
+copying path '/nix/store/igin5snx0ljc000yq7zgsi13nrn54yxc-libidn2-2.3.0' from 'https://cache.nixos.org'...
+copying path '/nix/store/rac7wjm9rlvbk4lv18g2jw22vyby9r3x-tzdata-2020f' from 'https://cache.nixos.org'...
+copying path '/nix/store/0qrayfgw779phhbasnrynvyakpczwdkb-glibc-2.32-39' from 'https://cache.nixos.org'...
+copying path '/nix/store/2bac51qc8jybrml27pak99f42gyhkq8b-sshcb-0.2.1' from 'https://nebulaworks.cachix.org'...
+/nix/store/2bac51qc8jybrml27pak99f42gyhkq8b-sshcb-0.2.1
+```
+
+### Pushing binaries to Cachix
+If you are updating a package or creating a new one, you'll want to push binaries to the cache. You'll
+need the Cachix auth token, which is stored in 1Password. Once you have the token, you can use either
+the `cachix authtoken` command, or set the `CACHIX_AUTH_TOKEN` environment variable.
+```
+cachix authtoken <TOKEN>
+- or -
+export CACHIX_AUTH_TOKEN=<TOKEN>
+```
+You'll then need to pipe the build output to Cachix as follows:
+```
+nix-build -A pkgs.derp | cachix push nebulaworks
+```
+
 ### Contributing
 
 Please fork this repository and open a PR to contribute to this repository
