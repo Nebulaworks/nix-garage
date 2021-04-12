@@ -81,7 +81,7 @@ jobs:
           ref: ${{ needs.verify.outputs.sha }}
 
       - name: Install Cachix
-        uses: cachix/cachix-action@73e75d1a0cd4330597a571e8f9dedb41faa2fc4e  # v10
+        uses: davido-nw/cachix-action@ce79e6dcca2294048648d50fb646a81f767ddc9c  # Forked from master; use sh to install instead of bash
         with:
           name: nebulaworks
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
