@@ -17,11 +17,11 @@ on:
 
 jobs:
   verify:
-    name: Verify Commenter    
+    name: Verify Commenter
     runs-on: ubuntu-18.04
 
     # Checks if the comment contains the word 'publish as well as if the comment was made in a PR
-    if: > 
+    if: >
       startsWith(github.event.comment.body, 'publish')
       && startsWith(github.event.issue.pull_request.url, 'https://')
 
@@ -29,7 +29,7 @@ jobs:
     outputs:
       status: ${{ steps.verify.outputs.status }}
       sha: ${{ steps.verify.outputs.sha }}
-    
+
     steps:
       # Verifies if commenter is approver, in which it will extract PR's head commit sha
       - name: Verify Commenter is Approver
@@ -70,7 +70,7 @@ jobs:
     # Utilizing nixos/nix docker image v2.3
     container:
       image: nixos/nix@sha256:af330838e838cedea2355e7ca267280fc9dd68615888f4e20972ec51beb101d8
-    
+
     steps:
       # Checks out repository to docker container
       # Utilizes the commit from the open PR, which was gotten from the previous step
@@ -79,6 +79,12 @@ jobs:
         uses: actions/checkout@28c7f3d2b5162b5ddd3dfd9a45aa55eaf396478b
         with:
           ref: ${{ needs.verify.outputs.sha }}
+
+      - name: Install Cachix
+        uses: cachix/cachix-action@73e75d1a0cd4330597a571e8f9dedb41faa2fc4e  # v10
+        with:
+          name: nebulaworks
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
 
       # Attempt to authenticatie to Docker hub and publish all images
       - name: Authenticate and Execute Publish Script
@@ -99,15 +105,15 @@ jobs:
             }
           }
           EOF
-          
+
           export DOCKER_HUB_TOKEN=$(nix-shell --run "curl -s -H 'Content-Type: application/json' -X POST \
           -d @$GITHUB_WORKSPACE/data.json --url https://hub.docker.com/v2/users/login/ | jq -r .token")
           set -x
           export REGISTRY_AUTH_FILE=$GITHUB_WORKSPACE/auth.json
 
           cd $GITHUB_WORKSPACE
-          allImgs=""          
-          for currImgPath in $(ls -d $GITHUB_WORKSPACE/imgs/*/); do 
+          allImgs=""
+          for currImgPath in $(ls -d $GITHUB_WORKSPACE/imgs/*/); do
             currImgName=$(basename $currImgPath)
             if [ -z $allImgs ]; then
               allImgs="$currImgName"
@@ -130,14 +136,14 @@ jobs:
     needs: [verify, publish]
 
     steps:
-      # Creates PR comment telling commentor that there was an issue with the commit SHA for the PR 
+      # Creates PR comment telling commentor that there was an issue with the commit SHA for the PR
       - name: Create Faulure PR Comment for Invalid Commit SHA
         if: needs.verify.outputs.status == 'invalidsha'
         uses: jungwinter/comment@5acbb5699b76c111821fb2540534cb339e2b32ed   # SHA ref v1.0.2
         with:
           type: create
           body: |
-            Hm, there was an issue with the commit SHA used to obtain the repository. 
+            Hm, there was an issue with the commit SHA used to obtain the repository.
             Please verify the commit SHA used: `${{ needs.verify.outputs.sha }}`
           token: ${{ secrets.NWIAUTO_PAT }}
           issue_number: ${{ github.event.issue.number }}
@@ -151,7 +157,7 @@ jobs:
           type: create
           body: |
             User `${{ github.event.comment.user.login }}` is not authorized to publish images from this repository.
-            
+
             Comment with a mention to `nebulaworks/approvers` to notify the approvers team to publishing the new Docker images.
           token: ${{ secrets.NWIAUTO_PAT }}
           issue_number: ${{ github.event.issue.number }}
@@ -164,7 +170,7 @@ jobs:
         with:
           type: create
           body: |
-            The following docker images: 
+            The following docker images:
             ${{ needs.publish.outputs.allImgs }}
             have been published on [Docker Hub](https://hub.docker.com/u/nebulaworks).
           token: ${{ secrets.NWIAUTO_PAT }}
