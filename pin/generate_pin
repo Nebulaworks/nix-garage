@@ -6,7 +6,7 @@
 
 set -eufo pipefail
 
-REPO='nixpkgs-channels'
+REPO='nixpkgs'
 OWNER='NixOS'
 ITER='0'
 
