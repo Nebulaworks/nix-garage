@@ -1,16 +1,23 @@
-{ lib, python3Packages, fetchFromGitHub }:
-
-python3Packages.buildPythonPackage rec {
-  pname = "flasksample";
-  version = "0.0.1";
-
-  # This is on my own fork but will bring this into NWI org in a followup
+{ lib
+, python3Packages
+, fetchFromGitHub
+}:
+let
   src = fetchFromGitHub {
-    owner = "sarcasticadmin";
-    rev = "1edd490a7d36727d2f9b0846fd3536f7b1baba45";
-    repo = "flaskapp";
-    sha256 = "1dmmg79lp0dr2sy9drrpj7k1bbs53awwqqckdyfjxvl0fj7pfmkb";
+    owner = "nebulaworks";
+    rev = "3f9676f6775054456f6082807d5ece05e12420ee";
+    repo = "orion";
+    sha256 = "074kyr15cqcd79n0dbv7ycra4ky0fkm1iw5cprznp8pjwwqmgnlm";
   };
+in
+python3Packages.buildPythonPackage rec {
+  # drv still needs src even though application is in subdir
+  inherit src;
+  pname = "flasksample";
+  version = "0.1.0";
+
+  # Need to look at the subdirectory since theres multiple apps here
+  sourceRoot = "${src.name}/apps/flasksample";
 
   propagatedBuildInputs = [ python3Packages.flask ];
 
