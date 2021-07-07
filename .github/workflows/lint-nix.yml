@@ -13,9 +13,9 @@ jobs:
     name: Run nixpkgs-fmt
     runs-on: ubuntu-18.04
 
-    # nixos/nix docker image v2.3 SHA
+    # Utilizing nixos/nix docker image v2.3.12
     container:
-      image: nixos/nix@sha256:af330838e838cedea2355e7ca267280fc9dd68615888f4e20972ec51beb101d8
+      image: nixos/nix@sha256:d9bb3b85b846eb0b6c5204e0d76639dff72c7871fb68f5d4edcfbb727f8a5653
 
     steps:
         # Checks out repository to docker container
