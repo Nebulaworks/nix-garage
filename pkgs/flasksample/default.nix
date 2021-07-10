@@ -5,9 +5,9 @@
 let
   src = fetchFromGitHub {
     owner = "nebulaworks";
-    rev = "3f9676f6775054456f6082807d5ece05e12420ee";
+    rev = "981295e99309d28f5d7461fa0f6b09466eefe034";
     repo = "orion";
-    sha256 = "074kyr15cqcd79n0dbv7ycra4ky0fkm1iw5cprznp8pjwwqmgnlm";
+    sha256 = "12nbb2a50fa1v3sffq7f584xcwjl1wfhjs659cxnkyvimfx4iwvf";
   };
 in
 python3Packages.buildPythonPackage rec {
