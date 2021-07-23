@@ -6,7 +6,7 @@
 
 set -eufo pipefail
 
-REPO='nixpkgs-channels'
+REPO='nixpkgs'
 OWNER='NixOS'
 ITER='0'
 
@@ -51,7 +51,7 @@ do
 done
 shift $((OPTIND -1))
 
-GITREF=${1:-'nixos-unstable'}
+GITREF=${1:-'master'}
 PINOUT="./pins/${GITREF}_${ITER}.json"
 
 test -f $PINOUT && echo "$PINOUT already exists" && exit 1
