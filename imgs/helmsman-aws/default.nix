@@ -1,14 +1,12 @@
 { system ? builtins.currentSystem, pkgs }:
 let
   nwi = import ../../nwi.nix;
-  callPackage = pkgs.lib.callPackageWith (pkgs // self);
-
-  self = {
-    helm-diff = callPackage ./pkgs/helm-diff { };
-  };
-
   lib = pkgs.lib;
-  contents = [ pkgs.coreutils pkgs.bash pkgs.cacert self.helm-diff pkgs.helmsman pkgs.kubernetes-helm pkgs.kubectl pkgs.jq pkgs.awscli ];
+  # Include helm-diff plugin
+  thisHelm = pkgs.wrapHelm pkgs.kubernetes-helm {
+    plugins = with pkgs.kubernetes-helmPlugins; [ helm-diff ];
+  };
+  contents = [ pkgs.coreutils pkgs.bash pkgs.cacert pkgs.helmsman pkgs.kubectl pkgs.jq pkgs.awscli thisHelm ];
 in
 pkgs.dockerTools.buildImage {
   inherit contents;
