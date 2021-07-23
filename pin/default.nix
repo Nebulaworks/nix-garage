@@ -1,4 +1,4 @@
-{ bootstrap ? import <nixpkgs> {}
+{ bootstrap ? import <nixpkgs> { }
 , snapshot
 }:
 let
@@ -9,4 +9,4 @@ let
     inherit (nixpkgs) rev sha256;
   };
 in
-import src {}
+import src { }

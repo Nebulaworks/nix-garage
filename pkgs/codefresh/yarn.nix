@@ -2779,11 +2779,11 @@
             sha256 = "1f9vzaxnkq9yh6sb5mbcnqgfk21icckabhc971f6ai8jr0sxhqn7";
           };
         in
-          runCommandNoCC "firebase.git" { buildInputs = [ gnutar ]; } ''
-            # Set u+w because tar-fs can't unpack archives with read-only dirs
-            # https://github.com/mafintosh/tar-fs/issues/79
-            tar cf $out --mode u+w -C ${repo} .
-          '';
+        runCommandNoCC "firebase.git" { buildInputs = [ gnutar ]; } ''
+          # Set u+w because tar-fs can't unpack archives with read-only dirs
+          # https://github.com/mafintosh/tar-fs/issues/79
+          tar cf $out --mode u+w -C ${repo} .
+        '';
     }
     {
       name = "flat_cache___flat_cache_1.3.4.tgz";

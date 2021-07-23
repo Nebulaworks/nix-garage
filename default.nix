@@ -1,4 +1,4 @@
-{ nixpkgs ? import <nixpkgs> {} }:
+{ nixpkgs ? import <nixpkgs> { } }:
 let
   pkgs = import nixpkgs.path { overlays = [ (import ./overlay.nix) ]; };
 in

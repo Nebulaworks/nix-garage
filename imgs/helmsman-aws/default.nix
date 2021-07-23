@@ -4,7 +4,7 @@ let
   callPackage = pkgs.lib.callPackageWith (pkgs // self);
 
   self = {
-    helm-diff = callPackage ./pkgs/helm-diff {};
+    helm-diff = callPackage ./pkgs/helm-diff { };
   };
 
   lib = pkgs.lib;
