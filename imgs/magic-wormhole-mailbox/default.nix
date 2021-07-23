@@ -23,7 +23,7 @@ pkgs.dockerTools.buildImage {
       "PATH=/bin/"
     ];
     ExposedPorts = {
-      "4000/tcp" = {};
+      "4000/tcp" = { };
     };
     WorkingDir = "/var/lib/magic-wormhole-mailbox";
     EntryPoint = [ "twist" "wormhole-mailbox" "--usage-db=usage.sqlite" "--port=tcp:4000" ];

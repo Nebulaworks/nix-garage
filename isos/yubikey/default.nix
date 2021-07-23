@@ -67,7 +67,7 @@ with pkgs; {
   # Air-gapped system
   boot.initrd.network.enable = false;
   networking.dhcpcd.enable = false;
-  networking.dhcpcd.allowInterfaces = [];
+  networking.dhcpcd.allowInterfaces = [ ];
   networking.firewall.enable = true;
   networking.useDHCP = false;
   networking.useNetworkd = false;
@@ -85,19 +85,19 @@ with pkgs; {
   # Sets up the shell to have an environment variable that creates the directory for all generated keys
   # Also utilizes a preconfigured gpg config and configures a gpg-agent config.
   environment.interactiveShellInit = ''
-    export GNUPGHOME=/run/user/$(id -u)/gnupghome
-    if [ ! -d $GNUPGHOME ]; then
-    mkdir $GNUPGHOME
-    fi
-    sudo cp ${pkgs.fetchurl {
-    url = "https://raw.githubusercontent.com/drduh/config/662c16404eef04f506a6a208f1253fee2f4895d9/gpg.conf";
-    sha256 = "118fmrsn28fz629y7wwwcx7r1wfn59h3mqz1snyhf8b5yh0sb8la";
-  }} "$GNUPGHOME/gpg.conf"
-    sudo cat << EOF > $GNUPGHOME/gpg-agent.conf
-    pinentry-program /run/current-system/sw/bin/pinentry-curses
-    EOF
-    sudo chown nixos:users $GNUPGHOME/gpg-agent.conf
-    sudo chmod 644 $GNUPGHOME/gpg-agent.conf
-    echo "\$GNUPGHOME has been set up for you. Generated keys will be in $GNUPGHOME."
+      export GNUPGHOME=/run/user/$(id -u)/gnupghome
+      if [ ! -d $GNUPGHOME ]; then
+      mkdir $GNUPGHOME
+      fi
+      sudo cp ${pkgs.fetchurl {
+      url = "https://raw.githubusercontent.com/drduh/config/662c16404eef04f506a6a208f1253fee2f4895d9/gpg.conf";
+      sha256 = "118fmrsn28fz629y7wwwcx7r1wfn59h3mqz1snyhf8b5yh0sb8la";
+    }} "$GNUPGHOME/gpg.conf"
+      sudo cat << EOF > $GNUPGHOME/gpg-agent.conf
+      pinentry-program /run/current-system/sw/bin/pinentry-curses
+      EOF
+      sudo chown nixos:users $GNUPGHOME/gpg-agent.conf
+      sudo chmod 644 $GNUPGHOME/gpg-agent.conf
+      echo "\$GNUPGHOME has been set up for you. Generated keys will be in $GNUPGHOME."
   '';
 }
