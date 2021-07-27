@@ -3,6 +3,6 @@ let
   pkgs = import nixpkgs.path { overlays = [ (import ./overlay.nix) ]; };
 in
 {
-  pkgs = pkgs;
+  inherit pkgs;
   imgs = import ./imgs { inherit pkgs; };
 }
