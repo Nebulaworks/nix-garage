@@ -19,4 +19,4 @@ skopeo inspect docker://${registry_endpoint} && exit 0
 
 nix-build -A imgs.$1
 
-skopeo copy docker-archive:result docker://${registry_endpoint}
+skopeo --insecure-policy copy docker-archive:result docker://${registry_endpoint}
