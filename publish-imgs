@@ -9,6 +9,9 @@ registry="docker.io"
 # if not just build all imgs
 attr=${1:-'imgs'}
 
+# For storing all built and published images
+BUILT=()
+
 for entry in $(nix-instantiate -A $attr); do
   derivation=$(nix show-derivation $entry)
   image_fullname=$(echo $derivation | jq -r '.[] | .env.imageName')
@@ -25,5 +28,12 @@ for entry in $(nix-instantiate -A $attr); do
   # We can use the drv here since we dont have the attribute path
   nix-build $entry
   skopeo --insecure-policy copy docker-archive:result docker://${registry_endpoint}
+  BUILT+=("$image_name:${calcout}")
 done
 
+if [ ${#BUILT[@]} -eq 0 ]; then
+  echo "Nothing to do"
+else
+  # Print built images:out comma separated if we built things
+  (IFS=,; echo "${BUILT[*]}")
+fi
