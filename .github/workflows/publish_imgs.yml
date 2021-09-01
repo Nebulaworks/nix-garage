@@ -121,21 +121,14 @@ jobs:
           export REGISTRY_AUTH_FILE=$GITHUB_WORKSPACE/auth.json
 
           cd $GITHUB_WORKSPACE
-          allImgs=""
-          for currImgPath in $(ls -d $GITHUB_WORKSPACE/imgs/*/); do
-            currImgName=$(basename $currImgPath)
-            if [ -z $allImgs ]; then
-              allImgs="$currImgName"
-            else
-              allImgs="$allImgs, $currImgName"
-            fi
-
-            set +x
-            nix-shell --run "cd $GITHUB_WORKSPACE && \
-            ./create-repo $DOCKER_HUB_TOKEN nebulaworks $currImgName && \
-            ./publish-imgs $currImgName"
-            set -x
+          # use drvs to find all images we would want to build
+          IMAGES=$(nix-shell --run "nix-instantiate --eval --strict --json -A imgs | jq -r 'keys[]'")
+          for image in ${IMAGES}; do
+            nix-shell --run "./create-repo $DOCKER_HUB_TOKEN nebulaworks $image"
           done
+
+          # Check to see what images we have to build
+          allImgs=$(nix-shell --run "./publish-imgs")
           echo ::set-output name=allImgs::$allImgs
         continue-on-error: false
 
