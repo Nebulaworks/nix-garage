@@ -1,0 +1,28 @@
+name: Daily Run
+
+on:
+  schedule:
+    - cron: '17 15 * * *' # Build every day
+  workflow_dispatch:
+  
+jobs:
+  upstream_nixpkgs:
+    name: 'Build images off master'
+    runs-on: ubuntu-18.04
+    # Utilizing nixos/nix docker image v2.3.12
+    container:
+      image: nixos/nix@sha256:d9bb3b85b846eb0b6c5204e0d76639dff72c7871fb68f5d4edcfbb727f8a5653
+    
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@28c7f3d2b5162b5ddd3dfd9a45aa55eaf396478b
+        with:
+          ref: master
+      - name: 'Publish off latest nixpkgs master'
+        run: |
+          # Beware of quoting here
+          sha=$(nix-shell --run "curl --request GET --url 'https://api.github.com/repos/nixos/nixpkgs/commits?per_page=1' -H 'Accept: application/vnd.github.v3+json' | jq -r '.[0].sha'")
+          export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs/archive/${sha}.tar.gz
+          # No need to create docker repos since we can assume they exist
+          # just publish here
+          nix-shell --run 'bash ./publish-imgs.sh'
