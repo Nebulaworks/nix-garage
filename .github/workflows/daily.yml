@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: '17 15 * * *' # Build every day
   workflow_dispatch:
-  
+
 jobs:
   upstream_nixpkgs:
     name: 'Build images off master'
@@ -12,7 +12,7 @@ jobs:
     # Utilizing nixos/nix docker image v2.3.12
     container:
       image: nixos/nix@sha256:d9bb3b85b846eb0b6c5204e0d76639dff72c7871fb68f5d4edcfbb727f8a5653
-    
+
     steps:
       - name: 'Checkout'
         uses: actions/checkout@28c7f3d2b5162b5ddd3dfd9a45aa55eaf396478b
@@ -20,6 +20,18 @@ jobs:
           ref: master
       - name: 'Publish off latest nixpkgs master'
         run: |
+          # Just need auth.json for skopeo
+          cat << EOF > ./auth.json
+          {
+            "auths": {
+              "https://index.docker.io/v1/": {
+                "auth": "$(echo -n 'nwiauto:${{ secrets.NWIAUTO_PASSWORD }}' | base64)"
+              }
+            }
+          }
+          EOF
+          export REGISTRY_AUTH_FILE=./auth.json
+
           # Beware of quoting here
           sha=$(nix-shell --run "curl --request GET --url 'https://api.github.com/repos/nixos/nixpkgs/commits?per_page=1' -H 'Accept: application/vnd.github.v3+json' | jq -r '.[0].sha'")
           export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs/archive/${sha}.tar.gz
