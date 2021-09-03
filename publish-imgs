@@ -3,20 +3,37 @@
 # shellcheck shell=bash
 set -efo pipefail
 
-test -z $1 && (echo "pass in img" && exit 1)
-
-derivation=$(nix show-derivation $(nix-instantiate -A imgs.$1))
 registry="docker.io"
-image_fullname=$(echo $derivation | jq -r '.[] | .env.imageName')
-org=$(echo $image_fullname | cut -d '/' -f 1)
-image_name=$(echo $image_fullname | cut -d '/' -f 2)
-calcout=$(echo $derivation | jq '.[] | .env.out')
-calcout=$(basename ${calcout} | cut -d '-' -f1)
-registry_endpoint="${registry}/${org}/${image_name}:${calcout}"
 
-# Check if this image is already in the registry and exit if so
-skopeo inspect docker://${registry_endpoint} && exit 0
+# Assume that we will pass in attribute path, i.e. imgs.awsutils
+# if not just build all imgs
+attr=${1:-'imgs'}
 
-nix-build -A imgs.$1
+# For storing all built and published images
+BUILT=()
 
-skopeo --insecure-policy copy docker-archive:result docker://${registry_endpoint}
+for entry in $(nix-instantiate -A $attr); do
+  derivation=$(nix show-derivation $entry)
+  image_fullname=$(echo $derivation | jq -r '.[] | .env.imageName')
+  org=$(echo $image_fullname | cut -d '/' -f 1)
+  image_name=$(echo $image_fullname | cut -d '/' -f 2)
+  calcout=$(echo $derivation | jq '.[] | .env.out')
+  calcout=$(basename ${calcout} | cut -d '-' -f1)
+  registry_endpoint="${registry}/${org}/${image_name}:${calcout}"
+
+  # Check if this image is already in the registry and if so continue to next item in the list
+  skopeo inspect docker://${registry_endpoint} && continue
+
+  # I guess we need to build and push this to the registry if weve made it this far
+  # We can use the drv here since we dont have the attribute path
+  nix-build $entry
+  skopeo --insecure-policy copy docker-archive:result docker://${registry_endpoint}
+  BUILT+=("$image_name:${calcout}")
+done
+
+if [ ${#BUILT[@]} -eq 0 ]; then
+  echo "Nothing to do"
+else
+  # Print built images:out comma separated if we built things
+  (IFS=,; echo "${BUILT[*]}")
+fi
