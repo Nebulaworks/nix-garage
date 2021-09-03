@@ -25,4 +25,4 @@ jobs:
           export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs/archive/${sha}.tar.gz
           # No need to create docker repos since we can assume they exist
           # just publish here
-          nix-shell --run 'bash ./publish-imgs.sh'
+          nix-shell --run 'bash ./publish-imgs'
