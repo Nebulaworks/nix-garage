@@ -3,7 +3,7 @@
 
 {}:
 let
-  nixpkgs = import ./pin { snapshot = "release-21.05_0"; };
+  nixpkgs = import ./pin { snapshot = "master_0"; };
   default = import ./default.nix { inherit nixpkgs; };
 in
 default
