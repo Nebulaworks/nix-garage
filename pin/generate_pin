@@ -19,7 +19,8 @@ Generate pins from nix channels
 
 OPTIONS:
   -h      Show this message
-  -i      set iteration
+  -i      set pin iteration
+  -r      set specific nixpkg rev/commit to use
 
 EXAMPLES:
   Generate nix pin from nixos-20.03 branch:
@@ -33,7 +34,7 @@ EXAMPLES:
 EOF
 }
 
-while getopts "hi:" OPTION
+while getopts "hi:r:" OPTION
 do
   case $OPTION in
     i )
@@ -42,6 +43,9 @@ do
     h )
       usage
       exit 0
+      ;;
+    r )
+      REV=$OPTARG
       ;;
     \? )
       usage
@@ -56,9 +60,14 @@ PINOUT="./pins/${GITREF}_${ITER}.json"
 
 test -f $PINOUT && echo "$PINOUT already exists" && exit 1
 
-APIRESP=$(curl "https://api.github.com/repos/$OWNER/$REPO/branches/$GITREF" | jq -r '.')
-REVDATE=$(echo ${APIRESP} | jq -r '.commit.commit.author.date')
-REV=$(echo ${APIRESP} | jq -r '.commit.sha')
+if [ -z ${REV} ]; then
+  APIRESP=$(curl "https://api.github.com/repos/$OWNER/$REPO/branches/$GITREF" | jq -r '.')
+  REV=$(echo ${APIRESP} | jq -r '.commit.sha')
+  REVDATE=$(echo ${APIRESP} | jq -r '.commit.commit.author.date')
+else
+  APIRESP=$(curl "https://api.github.com/repos/$OWNER/$REPO/commits/$REV" | jq -r '.')
+  REVDATE=$(echo ${APIRESP} | jq -r '.commit.author.date')
+fi
 
 SHA256=$(nix-prefetch-url --unpack "https://github.com/$OWNER/$REPO/archive/$REV.tar.gz")
 JQOUT=$(jq -n '{url: $url, rev: $rev, date: $date,  sha256: $sha256, fetchSubmodules: false, deepClone: false, leaveDotGit: false}' \
