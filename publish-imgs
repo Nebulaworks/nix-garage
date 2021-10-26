@@ -4,6 +4,48 @@
 set -efo pipefail
 
 registry="docker.io"
+nixtop="default.nix"
+
+# shellcheck disable=SC2148
+usage(){
+  cat << EOF
+usage: $(basename "$0") [OPTIONS] ATTR
+
+Check if images are in docker hub and publish if necessary
+
+OPTIONS:
+  -h      Show this message
+  -f      Set top-level nix file, default.nix otherwise
+  -s      Skip pushing to registry
+
+EXAMPLES:
+  Leverage release.nix instead of default.nix to publish:
+
+      $(basename "$0") -f release.nix
+
+EOF
+}
+
+while getopts "f:hs" OPTION
+do
+  case $OPTION in
+    f )
+      nixtop=$OPTARG
+      ;;
+    h )
+      usage
+      exit 0
+      ;;
+    s )
+      skip_publish=1
+      ;;
+    \? )
+      usage
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND -1))
 
 # Assume that we will pass in attribute path, i.e. imgs.awsutils
 # if not just build all imgs
@@ -12,8 +54,8 @@ attr=${1:-'imgs'}
 # For storing all built and published images
 BUILT=()
 
-for entry in $(nix-instantiate -A $attr); do
-  derivation=$(nix show-derivation $entry)
+for entry in $(nix-instantiate -A $attr $nixtop); do
+  derivation=$(nix show-derivation -f $nixtop $entry)
   image_fullname=$(echo $derivation | jq -r '.[] | .env.imageName')
   org=$(echo $image_fullname | cut -d '/' -f 1)
   image_name=$(echo $image_fullname | cut -d '/' -f 2)
@@ -24,9 +66,11 @@ for entry in $(nix-instantiate -A $attr); do
   # Check if this image is already in the registry and if so continue to next item in the list
   skopeo inspect docker://${registry_endpoint} && continue
 
+  # Skip publishing to registry if this flag is set
+  [[ ! -z $skip_publish ]] && echo "Would have published: ${image_name}" && continue
   # I guess we need to build and push this to the registry if weve made it this far
   # We can use the drv here since we dont have the attribute path
-  nix-build $entry
+  nix-build -A $entry $nixtop
   skopeo --insecure-policy copy docker-archive:result docker://${registry_endpoint}
   BUILT+=("$image_name:${calcout}")
 done
