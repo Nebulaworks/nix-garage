@@ -10,4 +10,6 @@ rec {
   magic-wormhole-mailbox = pkgs.callPackage ./magic-wormhole-mailbox { };
 
   pki-validator = pkgs.callPackage ./pki-validator { };
+
+  candidate-emailer = pkgs.callPackage ./candidate-emailer { };
 }
