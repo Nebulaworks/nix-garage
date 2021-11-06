@@ -8,6 +8,7 @@ Nebulaworks Engineering use of [nixpkgs](https://github.com/NixOS/nixpkgs)
 * [Publishing](./PUBLISHING.md)
 * [iso Configs](./isos/README.md)
 * [Templates](./templates/README.md)
+* [Release](./RELEASE.md)
 
 ## Building Nix Configurations
 While there are numerous ways of building Nix configurations, one way to build nix configs in a non-linux environment is

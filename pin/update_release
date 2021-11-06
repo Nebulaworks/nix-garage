@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+# This script takes care of the following tasks:
+#
+# - Grabs the latest successful daily build of our nix imgs using
+#   nixpkgs master
+# - It generates a new pin off that same point commit off nixpkgs
+# - Ensures the reference in release.nix is pointing to the correct pin
+#
+# You will need to `export GITHUB_TOKEN` since it has to query the github api
+# for metadata about the github actions runs
+
+UPSTREAM_BRANCH="master"
+ITERATION="0"
+PIN_NAME=${UPSTREAM_BRANCH}_${ITERATION}
+TMP_ZIP=$(mktemp)
+
+[ -z "${GITHUB_TOKEN}" ] && echo "Please 'export GITHUB_TOKEN='" && exit 1
+
+# Clean up tmp zip on exit
+trap "rm -f ${TMP_ZIP}" EXIT
+
+
+# Get latest run of workflow off master
+# run_id == id here not run_number :/
+RUN_ID=$(curl -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/repos/nebulaworks/nix-garage/actions/runs | \
+              jq '.workflow_runs | [ .[] | select( (.head_branch == "master") and (.name == "Daily Run") and (.conclusion == "success"))] | .[0].id ')
+
+# Apparently unzip cant use pipes so well have to write this out to the temp location
+# See `man zip` BUGS section:
+# [Unix]  Unix special files such as FIFO buffers (named pipes), block devices and character devices are not restored
+# even if they are somehow represented in the zipfile, nor are hard-linked files relinked. Basically the only file types
+# restored by unzip are regular files, directories and symbolic (soft) links.
+GRAB_LOGS=$(curl -L -H "Authorization: Bearer $GITHUB_TOKEN" \
+                 -H "Accept: application/vnd.github.v3+json" \
+                 https://api.github.com/repos/Nebulaworks/nix-garage/actions/runs/${RUN_ID}/logs \
+                 --output $TMP_ZIP)
+
+# Being lazy...
+# TODO: Shell golf
+# TODO: echoing a uniquer string during daily run is probably going to be better
+LATEST_BUILD_HASH=$(unzip -c $TMP_ZIP "Build images off master/4_Publish off latest nixpkgs master.txt" | grep -m 1 .unpacking | cut -d . -f3 | cut -d / -f5)
+
+echo "Found: $LATEST_BUILD_HASH"
+
+# If pin exists we assume it can be overwritten
+test -f pins/$PIN_NAME.json && rm pins/$PIN_NAME.json
+
+# Make a nice pin json ref
+./generate_pin -i $ITERATION -r $LATEST_BUILD_HASH $UPSTREAM_BRANCH
+
+# Update the release.nix to make sure that we are referring to this pin
+sed -i "s/\(snapshot[[:space:]]=[[:space:]]\)\".*\"/\1\"$PIN_NAME\"/" ../release.nix
