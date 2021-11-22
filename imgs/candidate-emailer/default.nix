@@ -2,12 +2,8 @@
 let
   nwi = import ../../nwi.nix;
   lib = pkgs.lib;
-  myPython = pkgs.python38.withPackages( ps: [
-    ps.awslambdaric
-    ps.boto3
-    ps.jinja2
-  ]);
-  contents = with pkgs; [ bash busybox myPython candidate-emailer ];
+  pythonEnv = pkgs.python3.withPackages(ps: [pkgs.candidate-emailer ps.awslambdaric]);
+  contents = with pkgs; [ bash busybox pythonEnv ];
 in
 pkgs.dockerTools.buildImage {
   inherit contents;
@@ -27,6 +23,6 @@ pkgs.dockerTools.buildImage {
       "org.opencontainers.image.authors" = nwi.company;
       "org.opencontainers.image.source" = nwi.source;
     };
-    WorkingDir = builtins.concatStringsSep "/" [pkgs.candidate-emailer.outPath pkgs.python38.sitePackages];
+    WorkingDir = builtins.concatStringsSep "/" [pkgs.candidate-emailer.outPath pythonEnv.sitePackages];
   };
 }

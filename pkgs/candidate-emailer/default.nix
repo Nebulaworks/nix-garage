@@ -1,41 +1,16 @@
-{ lib, python38Packages }:
+{ lib, fetchFromGitHub, poetry2nix, python39 }:
 let
   repo = fetchGit {
     url = "git@gitlab.com:nebulaworks/eng/infra.git";
     ref = "do/issue-442";
-    rev = "fa526ca36870ea771ec74f9c11766f54cf66e012";
-  };
-  jinja2 = python38Packages.buildPythonPackage rec {
-      pname = "Jinja2";
-      version = "2.11.3";
-      src = python38Packages.fetchPypi {
-        inherit pname version;
-        sha256 = "ptWEM94K6AA0fKsfowQ867q+i6qdKeZo8cdoy4ejM8Y=";
-      };
-      propagatedBuildInputs = [python38Packages.markupsafe];
+    rev = "11597bff612fa5db10c929cf180312a411c85457";
   };
 in
-python38Packages.buildPythonApplication rec {
-
-  pname = "candidate-emailer";
-  version = "0.1";
-  format = "pyproject";
-
+poetry2nix.mkPoetryApplication rec {
   src = "${repo}/awslambda/candidate-emailer";
-
-  nativeBuildInputs = [ python38Packages.poetry ];
-  propagatedBuildInputs = [ python38Packages.boto3 jinja2 ];
-
-  checkInputs = [
-      python38Packages.black
-      python38Packages.pytest
-      python38Packages.pytest-cov
-  ];
-  checkPhase = ''
-    black --check ./
-    pytest --cov=candidate_emailer --cov-report=term-missing --cov-fail-under=100
-  '';
-
+  python = python39;
+  pyproject = "${src}/pyproject.toml";
+  poetrylock = "${src}/poetry.lock";
   meta = with lib; {
     description = "Automated AWS IAM user key rotation";
     license = licenses.bsd3;
