@@ -47,15 +47,16 @@ do
 done
 shift $((OPTIND -1))
 
-# Assume that we will pass in attribute path, i.e. imgs.awsutils
-# if not just build all imgs
+# Assume that we will pass in attribute path prefix, i.e. imgs
+# TODO: This it technically broken for full attribute paths, i.e imgs.awsutils since the
+# entry we get from the nix-istantiate gets prefixed with the attribute
 attr=${1:-'imgs'}
 
 # For storing all built and published images
 BUILT=()
 
-for entry in $(nix-instantiate -A $attr $nixtop); do
-  derivation=$(nix show-derivation -f $nixtop $entry)
+for entry in $(nix-instantiate --eval --strict --json -A $attr $nixtop | jq -r 'keys[]' ); do
+  derivation=$(nix show-derivation -f $nixtop $attr.$entry)
   image_fullname=$(echo $derivation | jq -r '.[] | .env.imageName')
   org=$(echo $image_fullname | cut -d '/' -f 1)
   image_name=$(echo $image_fullname | cut -d '/' -f 2)
@@ -70,7 +71,7 @@ for entry in $(nix-instantiate -A $attr $nixtop); do
   [[ ! -z $skip_publish ]] && echo "Would have published: ${image_name}" && continue
   # I guess we need to build and push this to the registry if weve made it this far
   # We can use the drv here since we dont have the attribute path
-  nix-build -A $entry $nixtop
+  nix-build -A $attr.$entry $nixtop
   skopeo --insecure-policy copy docker-archive:result docker://${registry_endpoint}
   BUILT+=("$image_name:${calcout}")
 done
