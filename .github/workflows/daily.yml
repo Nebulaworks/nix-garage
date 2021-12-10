@@ -17,7 +17,7 @@ jobs:
       - name: 'Checkout'
         uses: actions/checkout@28c7f3d2b5162b5ddd3dfd9a45aa55eaf396478b
         with:
-          ref: master
+          ref: ${{ env.BRANCH }} # should always be master but might be something else if testing
       - name: 'Publish off latest nixpkgs master'
         run: |
           # Just need auth.json for skopeo
