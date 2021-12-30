@@ -6,4 +6,6 @@ self: super:
   git-divergence = super.callPackage ./pkgs/git-divergence { };
   sshcb = super.callPackage ./pkgs/sshcb { };
   terraform-config-inspect = super.callPackage ./pkgs/terraform-config-inspect { };
+
+  nwibuilders = super.lib.recurseIntoAttrs (super.callPackage ./pkgs/builders { });
 }
