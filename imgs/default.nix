@@ -9,5 +9,7 @@ rec {
 
   magic-wormhole-mailbox = pkgs.callPackage ./magic-wormhole-mailbox { };
 
+  nwi-pr-utils = pkgs.callPackage ./nwi-pr-utils { };
+
   pki-validator = pkgs.callPackage ./pki-validator { };
 }
