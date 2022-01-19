@@ -13,10 +13,8 @@ let
       repo = "tfsec";
       sha256 = "QRquQmPOaBEiDX5EvyzMI68mvy3A06l1s1gYXxg5xNM=";
     };
-    goPackagePath = null;
-    ldflags = null;
   });
-  contents = with pkgs; [ bash coreutils custom-tfsec yamllint ];
+  contents = [ pkgs.bash pkgs.coreutils custom-tfsec pkgs.yamllint ];
 in
 pkgs.dockerTools.buildImage {
   inherit contents;
