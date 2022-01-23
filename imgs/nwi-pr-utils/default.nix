@@ -3,18 +3,7 @@ let
   nwi = import ../../nwi.nix;
   lib = pkgs.lib;
 
-  # Locking version of tfsec to what it was in the existing GitLab CI job definitions.
-  # TODO: Upgrade to the latest and remediate all new findings.
-  custom-tfsec = pkgs.tfsec.overrideAttrs (oldAttrs: rec {
-    version = "0.39.26";
-    src = fetchFromGitHub {
-      owner = "aquasecurity";
-      rev = "17acbbd9e5628f6ccbe694fc5f368720fb3e4666";
-      repo = "tfsec";
-      sha256 = "QRquQmPOaBEiDX5EvyzMI68mvy3A06l1s1gYXxg5xNM=";
-    };
-  });
-  contents = [ pkgs.bash pkgs.coreutils custom-tfsec pkgs.yamllint ];
+  contents = [ pkgs.bash pkgs.coreutils pkgs.tfsec pkgs.yamllint ];
 in
 pkgs.dockerTools.buildImage {
   inherit contents;
