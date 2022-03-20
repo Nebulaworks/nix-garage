@@ -1,6 +1,8 @@
 { pkgs }:
 
 rec {
+  ansible-lint = pkgs.callPackage ./ansible-lint { };
+
   awsutils = pkgs.callPackage ./awsutils { };
 
   flasksample = pkgs.callPackage ./flasksample { };
