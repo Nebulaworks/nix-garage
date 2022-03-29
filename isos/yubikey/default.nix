@@ -17,7 +17,6 @@ with pkgs; {
     # Pre-req Packages
     gnupg
     pinentry-curses
-    pinentry-qt
     paperkey
     wget
     pcsctools
@@ -50,7 +49,7 @@ with pkgs; {
   services.pcscd.enable = true;
 
   # Sets the root user to have an empty password
-  services.mingetty.helpLine = "The 'root' account has an empty password.";
+  services.getty.helpLine = "The 'root' account has an empty password.";
   users.extraUsers.root.initialHashedPassword = "";
 
   # Makes sure that all data is written to ram and not persistently stored
