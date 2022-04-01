@@ -12,4 +12,6 @@ rec {
   nwi-pr-utils = pkgs.callPackage ./nwi-pr-utils { };
 
   pki-validator = pkgs.callPackage ./pki-validator { };
+
+  term-apply = pkgs.callPackage ./term-apply { };
 }
