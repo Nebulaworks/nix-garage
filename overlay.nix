@@ -5,5 +5,6 @@ self: super:
   flasksample = super.callPackage ./pkgs/flasksample { };
   git-divergence = super.callPackage ./pkgs/git-divergence { };
   sshcb = super.callPackage ./pkgs/sshcb { };
+  term-apply = super.callPackage ./pkgs/term-apply { };
   terraform-config-inspect = super.callPackage ./pkgs/terraform-config-inspect { };
 }
