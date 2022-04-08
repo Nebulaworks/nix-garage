@@ -5,7 +5,7 @@ let
   nixpkgs = builtins.fromJSON (builtins.readFile (./pins + "/${snapshot}.json"));
   src = bootstrap.fetchFromGitHub {
     owner = "NixOS";
-    repo = "nixpkgs-channels";
+    repo = "nixpkgs";
     inherit (nixpkgs) rev sha256;
   };
 in
