@@ -67,9 +67,9 @@ jobs:
     outputs:
       allImgs: ${{ steps.publish.outputs.allImgs }}
 
-    # Utilizing nixos/nix docker image v2.3.12
+    # Utilizing nixos/nix docker image v2.7.0
     container:
-      image: nixos/nix@sha256:d9bb3b85b846eb0b6c5204e0d76639dff72c7871fb68f5d4edcfbb727f8a5653
+           image: nixos/nix@sha256:fc55b9bf9f61742a3fc262c0dc9ad62ea8ace014bb5bd4b11341da879e7b26ce
 
     steps:
       # Checks out repository to docker container
