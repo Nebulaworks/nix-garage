@@ -74,9 +74,9 @@ jobs:
     steps:
       # Checks out repository to docker container
       # Utilizes the commit from the open PR, which was gotten from the previous step
-      # Using SHA v2
+      # Using actions checkout v1
       - name: Pulls repository code
-        uses: actions/checkout@28c7f3d2b5162b5ddd3dfd9a45aa55eaf396478b
+        uses: actions/checkout@0b496e91ec7ae4428c3ed2eeb4c3a40df431f2cc
         with:
           ref: ${{ needs.verify.outputs.sha }}
 
