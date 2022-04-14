@@ -33,11 +33,12 @@ jobs:
       - name: Verify Nix Configs
         id: format
         run: |
+          nix-shell --run '\
           cd $GITHUB_WORKSPACE
           has_failed="false"
           for file_path in $(find . -name "*.nix"); do
             fmt_file_path="${file_path%.*}_fmt.nix"
-            nix-shell --run "cat $file_path | nixpkgs-fmt > $fmt_file_path" 
+            cat $file_path | nixpkgs-fmt > $fmt_file_path
 
             set +e
             differences=$(diff $file_path $fmt_file_path)
@@ -53,5 +54,5 @@ jobs:
           if [ "$has_failed" == "true" ]; then
             echo "::error ::Some nix configs were not properly formatted beforehand with nixpkgs-fmt."
             exit 1
-          fi
+          fi'
         continue-on-error: false
