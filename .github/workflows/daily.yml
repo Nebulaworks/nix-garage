@@ -9,13 +9,13 @@ jobs:
   upstream_nixpkgs:
     name: 'Build images off master'
     runs-on: ubuntu-18.04
-    # Utilizing nixos/nix docker image v2.3.12
+    # Utilizing nixos/nix docker image v2.7.0
     container:
-      image: nixos/nix@sha256:d9bb3b85b846eb0b6c5204e0d76639dff72c7871fb68f5d4edcfbb727f8a5653
-
+      image: nixos/nix@sha256:fc55b9bf9f61742a3fc262c0dc9ad62ea8ace014bb5bd4b11341da879e7b26ce
     steps:
       - name: 'Checkout'
-        uses: actions/checkout@28c7f3d2b5162b5ddd3dfd9a45aa55eaf396478b
+        # actions checkout v1
+        uses: actions/checkout@0b496e91ec7ae4428c3ed2eeb4c3a40df431f2cc
         with:
           ref: ${{ env.BRANCH }} # should always be master but might be something else if testing
       - name: 'Publish off latest nixpkgs master'

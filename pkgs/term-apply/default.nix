@@ -16,9 +16,7 @@ buildGoModule rec {
 
   sourceRoot = "${src.name}/apps/term-apply";
 
-  # Using old sha format since nix old
-  vendorSha256 = "166m30ccq6kcjmv3la4fkylzknyclqywh4pkfn4am9715231l495";
-  #vendorSha256 = "0hjk37kc5sdzhb9f232ljvnn19cd8f9slpay9ddb9ljggrm9gsak";
+  vendorSha256 = "sha256-U+mXan5P0rRaS15dqpNDjaVg7ZZUDOHSgr/pwuYZU0I=";
 
   #"-X ${sourceRoot}/pkg/version.Commit=${src.rev}"
   #"-X ${sourceRoot}/pkg/version.BuildTime=01011970"

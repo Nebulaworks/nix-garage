@@ -13,16 +13,16 @@ jobs:
     name: Run nixpkgs-fmt
     runs-on: ubuntu-18.04
 
-    # Utilizing nixos/nix docker image v2.3.12
+    # Utilizing nixos/nix docker image v2.7.0
     container:
-      image: nixos/nix@sha256:d9bb3b85b846eb0b6c5204e0d76639dff72c7871fb68f5d4edcfbb727f8a5653
+      image: nixos/nix@sha256:fc55b9bf9f61742a3fc262c0dc9ad62ea8ace014bb5bd4b11341da879e7b26ce
 
     steps:
         # Checks out repository to docker container
         # Utilizes the commit from the open PR
-        # Using SHA v2
+        # Using actions v1
       - name: Pulls Repository
-        uses: actions/checkout@28c7f3d2b5162b5ddd3dfd9a45aa55eaf396478b
+        uses: actions/checkout@0b496e91ec7ae4428c3ed2eeb4c3a40df431f2cc
         with:
           ref: ${{ github.event.pull_request.head.sha }}
       
@@ -33,11 +33,12 @@ jobs:
       - name: Verify Nix Configs
         id: format
         run: |
+          nix-shell --run '\
           cd $GITHUB_WORKSPACE
           has_failed="false"
           for file_path in $(find . -name "*.nix"); do
             fmt_file_path="${file_path%.*}_fmt.nix"
-            nix-shell --run "cat $file_path | nixpkgs-fmt > $fmt_file_path" 
+            cat $file_path | nixpkgs-fmt > $fmt_file_path
 
             set +e
             differences=$(diff $file_path $fmt_file_path)
@@ -53,5 +54,5 @@ jobs:
           if [ "$has_failed" == "true" ]; then
             echo "::error ::Some nix configs were not properly formatted beforehand with nixpkgs-fmt."
             exit 1
-          fi
+          fi'
         continue-on-error: false

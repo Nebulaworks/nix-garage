@@ -1,4 +1,4 @@
-with import ./pin { snapshot = "release-21.05_0"; };
+with import ./pin { snapshot = "master_0"; };
 
 mkShell {
   buildInputs = [

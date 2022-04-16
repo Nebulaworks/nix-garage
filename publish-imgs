@@ -56,7 +56,7 @@ attr=${1:-'imgs'}
 BUILT=()
 
 for entry in $(nix-instantiate --eval --strict --json -A $attr $nixtop | jq -r 'keys[]' ); do
-  derivation=$(nix show-derivation -f $nixtop $attr.$entry)
+  derivation=$(nix --extra-experimental-features "nix-command flakes" show-derivation -f $nixtop $attr.$entry)
   image_fullname=$(echo $derivation | jq -r '.[] | .env.imageName')
   org=$(echo $image_fullname | cut -d '/' -f 1)
   image_name=$(echo $image_fullname | cut -d '/' -f 2)
