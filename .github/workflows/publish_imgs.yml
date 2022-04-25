@@ -69,7 +69,7 @@ jobs:
 
     # Utilizing nixos/nix docker image v2.7.0
     container:
-           image: nixos/nix@sha256:fc55b9bf9f61742a3fc262c0dc9ad62ea8ace014bb5bd4b11341da879e7b26ce
+      image: nixos/nix@sha256:fc55b9bf9f61742a3fc262c0dc9ad62ea8ace014bb5bd4b11341da879e7b26ce
 
     steps:
       # Checks out repository to docker container
@@ -79,21 +79,6 @@ jobs:
         uses: actions/checkout@0b496e91ec7ae4428c3ed2eeb4c3a40df431f2cc
         with:
           ref: ${{ needs.verify.outputs.sha }}
-
-      - name: Install bash
-        run: |
-          mkdir /github/home/.nix-defexpr
-          ln -s /nix/var/nix/profiles/default /github/home/.nix-profile
-          ln -s /nix/var/nix/profiles/per-user/root/channels /github/home/.nix-defexpr/channels
-          nix-env -iA nixpkgs.bash
-        shell: sh {0}
-        continue-on-error: false
-
-      - name: Install Cachix
-        uses: cachix/cachix-action@73e75d1a0cd4330597a571e8f9dedb41faa2fc4e  # v10
-        with:
-          name: nebulaworks
-          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
 
       # Attempt to authenticatie to Docker hub and publish all images
       - name: Authenticate and execute publish script
