@@ -9,7 +9,17 @@ This is how we currently publish images to [dockerhub](https://hub.docker.com/re
 2. Wait for CI job to comment back with job success. New images will be published to the appropriate dockerhub
    repositories
 
-## Manaul
+## Testing
+
+You can test building all the images locally without needing to have write credentials to dockerhub:
+
+```
+~$ nix-shell
+~$ make test-publish
+```
+> Note: This will also check the existing repos to see if the img was already built 
+
+## Manual
 
 If you are testing or unable to leverage the CI job for some reason, you can resort back to the manual publishing
 process defined here.
