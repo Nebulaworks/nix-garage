@@ -2,8 +2,10 @@
 # To build the iso: 
 # nix-build '<nixpkgs/nixos>' -A config.system.build.isoImage -I nixos-config=default.nix --out-link installer
 
-{ config, pkgs, ... }:
-
+{ config, ... }:
+let
+  pkgs = import ../../pin { snapshot = "master_0"; };
+in
 with pkgs; {
   # Utilizing the bare minimum version in this case. Can also use the graphical version as well
   # Also adds in the specific nix-channel that was used to build the iso into the iso, just in case if ad-hoc packages are needed.
