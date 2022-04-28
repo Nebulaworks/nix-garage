@@ -113,7 +113,7 @@ jobs:
           done
 
           # Check to see what images we have to build
-          allImgs=$(nix-shell --run "./publish-imgs")
+          allImgs=$(nix-shell --run "./publish-imgs -f ci.nix")
           echo ::set-output name=allImgs::$allImgs
         continue-on-error: false
 
