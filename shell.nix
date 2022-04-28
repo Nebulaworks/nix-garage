@@ -8,5 +8,6 @@ mkShell {
     skopeo
     nixpkgs-fmt
     curl
+    gnumake
   ];
 }

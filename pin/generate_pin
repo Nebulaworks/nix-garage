@@ -4,7 +4,7 @@
 #
 # Inspired by: https://vaibhavsagar.com/blog/2018/05/27/quick-easy-nixpkgs-pinning/
 
-set -eufo pipefail
+set -efo pipefail
 
 REPO='nixpkgs'
 OWNER='NixOS'
@@ -60,7 +60,7 @@ PINOUT="./pins/${GITREF}_${ITER}.json"
 
 test -f $PINOUT && echo "$PINOUT already exists" && exit 1
 
-if [ -z ${REV} ]; then
+if [ -z $REV ]; then
   APIRESP=$(curl "https://api.github.com/repos/$OWNER/$REPO/branches/$GITREF" | jq -r '.')
   REV=$(echo ${APIRESP} | jq -r '.commit.sha')
   REVDATE=$(echo ${APIRESP} | jq -r '.commit.commit.author.date')
