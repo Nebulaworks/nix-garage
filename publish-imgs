@@ -55,6 +55,14 @@ attr=${1:-'imgs'}
 # For storing all built and published images
 BUILT=()
 
+# When using a non-blank ${nixtop} (such as in CI), a new derivation will have to be built
+# during the nix-instantiate in the for loop, because it doesn't yet exist. Having --eval
+# in the command causes it to fail if the dervivation is not yet there. We do the following
+# without --eval and direct its output to /dev/null only as a "pre-populate" step to build
+# the derivation as a work around.
+# TODO: There might be a better way to "pre-generate" the derivation for ci, consider replacing
+nix-instantiate --strict --json -A $attr $nixtop &> /dev/null
+
 for entry in $(nix-instantiate --eval --strict --json -A $attr $nixtop | jq -r 'keys[]' ); do
   derivation=$(nix --extra-experimental-features "nix-command flakes" show-derivation -f $nixtop $attr.$entry)
   image_fullname=$(echo $derivation | jq -r '.[] | .env.imageName')
