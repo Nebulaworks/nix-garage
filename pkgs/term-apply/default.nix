@@ -3,9 +3,9 @@
 let
   src = fetchFromGitHub {
     owner = "nebulaworks";
-    rev = "5d3155c53e0c262560368b269530d74e858b3be9";
+    rev = "3a1aca5aa9a31815d915c145010a7432f41c10aa";
     repo = "orion";
-    sha256 = "sha256:0sbawwivyl0z74v0qfi08q4ryky40w2jnlib73q83nhpzf7bj79l";
+    sha256 = "sha256:1a1ympq4654rx46s45pwn0dxdn6mbj1nqv1f7n6h72jszi09y34g";
   };
 
 in
@@ -16,11 +16,8 @@ buildGoModule rec {
 
   sourceRoot = "${src.name}/apps/term-apply";
 
-  vendorSha256 = "sha256-U+mXan5P0rRaS15dqpNDjaVg7ZZUDOHSgr/pwuYZU0I=";
+  vendorSha256 = "sha256-DA923aOtIvvzre6PFUwrnHwb0WMe67v3eqp0Ejm1ArI=";
 
-  #"-X ${sourceRoot}/pkg/version.Commit=${src.rev}"
-  #"-X ${sourceRoot}/pkg/version.BuildTime=01011970"
-  # Having issues leveraging sourceroot will debug shortly
   ldflags = [
     "-X github.com/nebulaworks/orion/apps/term-apply/pkg/version.Commit=${src.rev}"
     "-X github.com/nebulaworks/orion/apps/term-apply/pkg/version.BuildTime=01011970"
