@@ -2,8 +2,10 @@
 # To build the iso: 
 # nix-build '<nixpkgs/nixos>' -A config.system.build.isoImage -I nixos-config=default.nix --out-link installer
 
-{ config, pkgs, ... }:
-
+{ config, ... }:
+let
+  pkgs = import ../../pin { snapshot = "master_0"; };
+in
 with pkgs; {
   # Utilizing the bare minimum version in this case. Can also use the graphical version as well
   # Also adds in the specific nix-channel that was used to build the iso into the iso, just in case if ad-hoc packages are needed.
@@ -17,7 +19,6 @@ with pkgs; {
     # Pre-req Packages
     gnupg
     pinentry-curses
-    pinentry-qt
     paperkey
     wget
     pcsctools
@@ -50,7 +51,7 @@ with pkgs; {
   services.pcscd.enable = true;
 
   # Sets the root user to have an empty password
-  services.mingetty.helpLine = "The 'root' account has an empty password.";
+  services.getty.helpLine = "The 'root' account has an empty password.";
   users.extraUsers.root.initialHashedPassword = "";
 
   # Makes sure that all data is written to ram and not persistently stored
