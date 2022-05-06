@@ -14,8 +14,7 @@ buildGoModule rec {
 
   vendorSha256 = "1zgf7fczm0nx7x6lqjjxy0gkd53amszjjyc9ldy4rzf7y8n15ry1";
 
-  buildFlagsArray = [
-    "-ldflags="
+  ldflags = [
     "-s"
     "-w"
     "-X github.com/${owner}/${pname}/cmd.Version=${rev}"
