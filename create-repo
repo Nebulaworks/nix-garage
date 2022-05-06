@@ -15,6 +15,19 @@ test -z $1 && (echo "Script needs a token towards Docker Hub!" && exit 1)
 test -z $2 && (echo "Script needs a user/org that exists in Docker Hub!" && exit 1)
 test -z $3 && (echo "Script needs a repo name to verify/use!" && exit 1)
 
+update_readme() {
+    # The passed in repo will have a new full_description associated with the README.md located in /img/image_name/
+    if [ -f ./imgs/$3/README.md ]; then
+        echo "Updating repo with ./imgs/$3/README.md..."
+        RESPONSE_CODE=$(curl -s -L --write-out %{response_code} --output /dev/null -H "Authorization: JWT $1" \
+            -X PATCH --data-urlencode full_description@./imgs/$3/README.md \
+            --url https://hub.docker.com/v2/repositories/$2/$3/)
+        echo "Results: $RESPONSE_CODE"
+    else
+        echo "./imgs/$3/README.md doesn't exist, skipping README update..."
+    fi
+}
+
 REPO_EXISTS_CODE=$(curl --write-out %{response_code} --output /dev/null -s \
     -H "Content-Type: application/json" -H "Authorization: JWT $1" \
     --url https://hub.docker.com/v2/repositories/$2/$3/)
@@ -36,16 +49,18 @@ EOF
 
     # Clean up temp data
     rm $tmpdata
+    update_readme $1 $2 $3
 else
-    echo "Repo $3 already exists in $2. Skipping rest of script (including org perms and README addition)."
+    echo "Repo $3 already exists in $2. Skipping rest of script (including org perms)."
+    update_readme $1 $2 $3
     exit 0
 fi
 
-# We only run these next lines of code if the repo did NOT exist at first 
+# We only run these next lines of code if the repo did NOT exist at first
 ORG_RESPONSE_CODE=$(curl -s --write-out %{response_code} --output /dev/null \
     -H "Content-Type: application/json" -H "Authorization: JWT $1" \
     --url https://hub.docker.com/v2/orgs/$2/groups/)
-    
+
 if [ $ORG_RESPONSE_CODE -eq 200 ]; then
     echo "User is actually organization, attempting to add engineering group with read/write permissions in repo $3..."
     ENG_GROUP_ID=$(curl -s -H "Content-Type: application/json" -H "Authorization: JWT $1" \
@@ -55,7 +70,7 @@ if [ $ORG_RESPONSE_CODE -eq 200 ]; then
     --url https://hub.docker.com/v2/repositories/$2/$3/groups/ | jq --argjson id $ENG_GROUP_ID \
     '.results[] | select(.group_id == $id)')
 
-    if [ -z $VERIFY_ENG_GROUP ]; then 
+    if [ -z $VERIFY_ENG_GROUP ]; then
         # Docker API mentions that permissions for repos are cumulative, meaning write also implies read
         # https://docs.docker.com/docker-hub/orgs/#permissions-reference
         curl -s -H "Content-Type: application/json" -H "Authorization: JWT $1" -X POST \
@@ -68,10 +83,3 @@ if [ $ORG_RESPONSE_CODE -eq 200 ]; then
 else
     echo "User is not organization, skipping adding group permissions..."
 fi
-
-# The passed in repo will have a new full_description associated with the README.md associated in the /img/image_name/
-echo "Adding ./imgs/$3/README.md to repo..."
-RESPONSE_CODE=$(curl -s -L --write-out %{response_code} --output /dev/null -H "Authorization: JWT $1" \
-    -X PATCH --data-urlencode full_description@./imgs/$3/README.md \
-    --url https://hub.docker.com/v2/repositories/$2/$3/)
-echo "Results: $RESPONSE_CODE"
