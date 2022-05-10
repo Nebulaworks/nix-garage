@@ -2,7 +2,7 @@
 let
   nwi = import ../../nwi.nix;
   lib = pkgs.lib;
-  importedPythonPkgs = with pkgs; python37.withPackages (pythonPkgs: with pythonPkgs; [ magic-wormhole-mailbox-server ]);
+  importedPythonPkgs = with pkgs; python3.withPackages (pythonPkgs: with pythonPkgs; [ magic-wormhole-mailbox-server ]);
   contents = with pkgs; [ bash coreutils procps importedPythonPkgs ];
 in
 pkgs.dockerTools.buildImage {
