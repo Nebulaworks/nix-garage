@@ -32,6 +32,6 @@ python3Packages.buildPythonPackage rec {
   meta = with lib; {
     description = "Outline stale/outdated unmerged remote branches in a given Git Repository";
     license = licenses.bsd3;
-    maintainers = "NWI";
+    maintainers = [ "NWI" ];
   };
 }

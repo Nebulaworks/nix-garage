@@ -26,7 +26,7 @@ buildGoModule rec {
   meta = with lib; {
     description = "SSH Daemon for resume applicants to nebulaworks";
     homepage = "https://github.com/orion";
-    maintainers = "NWI";
+    maintainers = [ "NWI" ];
     license = licenses.bsd3;
   };
 }

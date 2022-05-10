@@ -23,7 +23,7 @@ buildGoModule rec {
   meta = with lib; {
     description = "Terraform config inspect Go module and CLI tool";
     homepage = "https://github.com/hashicorp/terraform-config-inspect";
-    maintainers = "NWI";
+    maintainers = [ "NWI" ];
     license = licenses.bsd2;
   };
 }
