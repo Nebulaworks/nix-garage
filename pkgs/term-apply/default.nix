@@ -3,16 +3,16 @@
 let
   src = fetchFromGitHub {
     owner = "nebulaworks";
-    rev = "3a1aca5aa9a31815d915c145010a7432f41c10aa";
+    rev = "fb0b1491c68afca0e06703835f984b371e0571e6";
     repo = "orion";
-    sha256 = "sha256:1a1ympq4654rx46s45pwn0dxdn6mbj1nqv1f7n6h72jszi09y34g";
+    sha256 = "sha256:12fv5ck0zv21f2q6qqlag1hdwr2dqblj9c02mnvwxscqrya907nj";
   };
 
 in
 buildGoModule rec {
   inherit src;
   pname = "term-apply-unstable";
-  version = "2022-03-29";
+  version = "2022-05-13";
 
   sourceRoot = "${src.name}/apps/term-apply";
 
@@ -24,7 +24,7 @@ buildGoModule rec {
   ];
 
   meta = with lib; {
-    description = "SSH Daemon for resume applicants to nebulaworks";
+    description = "SSH Daemon for resume applicants to Nebulaworks";
     homepage = "https://github.com/orion";
     maintainers = "NWI";
     license = licenses.bsd3;
