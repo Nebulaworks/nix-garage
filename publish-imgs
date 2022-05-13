@@ -60,8 +60,10 @@ BUILT=()
 # in the command causes it to fail if the dervivation is not yet there. We do the following
 # without --eval and direct its output to /dev/null only as a "pre-populate" step to build
 # the derivation as a work around.
+# Make sure /dev/null doesnt gobble stderr since we want that to bubble up in ci
+#
 # TODO: There might be a better way to "pre-generate" the derivation for ci, consider replacing
-nix-instantiate --strict --json -A $attr $nixtop &> /dev/null
+nix-instantiate --strict --json -A $attr $nixtop > /dev/null
 ENTRIES=$(nix-instantiate --eval --strict --json -A $attr $nixtop | jq -r 'keys[]' )
 for entry in ${ENTRIES[@]}; do
   derivation=$(nix --extra-experimental-features "nix-command flakes" show-derivation -f $nixtop $attr.$entry)
