@@ -62,8 +62,8 @@ BUILT=()
 # the derivation as a work around.
 # TODO: There might be a better way to "pre-generate" the derivation for ci, consider replacing
 nix-instantiate --strict --json -A $attr $nixtop &> /dev/null
-
-for entry in $(nix-instantiate --eval --strict --json -A $attr $nixtop | jq -r 'keys[]' ); do
+ENTRIES=$(nix-instantiate --eval --strict --json -A $attr $nixtop | jq -r 'keys[]' )
+for entry in ${ENTRIES[@]}; do
   derivation=$(nix --extra-experimental-features "nix-command flakes" show-derivation -f $nixtop $attr.$entry)
   image_fullname=$(echo $derivation | jq -r '.[] | .env.imageName')
   org=$(echo $image_fullname | cut -d '/' -f 1)
