@@ -24,6 +24,6 @@ python3Packages.buildPythonPackage rec {
   meta = with lib; {
     description = "Simple flask application for testing web requests";
     license = licenses.bsd3;
-    maintainers = "NWI";
+    maintainers = [ "NWI" ];
   };
 }

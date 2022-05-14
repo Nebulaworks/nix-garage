@@ -18,6 +18,6 @@ python3Packages.buildPythonPackage rec {
   meta = with lib; {
     description = "Automated AWS IAM user key rotation";
     license = licenses.bsd3;
-    maintainers = "NWI";
+    maintainers = [ "NWI" ];
   };
 }
