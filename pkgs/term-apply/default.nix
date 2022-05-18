@@ -3,16 +3,16 @@
 let
   src = fetchFromGitHub {
     owner = "nebulaworks";
-    rev = "fb0b1491c68afca0e06703835f984b371e0571e6";
+    rev = "b9d129b6b626dfd81c36e4c555822f86f5e95b76";
     repo = "orion";
-    sha256 = "sha256:12fv5ck0zv21f2q6qqlag1hdwr2dqblj9c02mnvwxscqrya907nj";
+    sha256 = "sha256:0483vyfrdc55cb1zda73za8ppjk5g7sljyjb0aj87f75qrgf4cv7";
   };
 
 in
 buildGoModule rec {
   inherit src;
   pname = "term-apply-unstable";
-  version = "2022-05-13";
+  version = "2022-05-17";
 
   sourceRoot = "${src.name}/apps/term-apply";
 
