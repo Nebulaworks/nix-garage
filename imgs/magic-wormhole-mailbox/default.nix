@@ -2,8 +2,15 @@
 let
   nwi = import ../../nwi.nix;
   lib = pkgs.lib;
-  importedPythonPkgs = with pkgs; python3.withPackages (pythonPkgs: with pythonPkgs; [ magic-wormhole-mailbox-server ]);
-  contents = with pkgs; [ bash coreutils procps importedPythonPkgs ];
+
+  # Temporarily disable python checks
+  # TODO: Watching for upstream fix: https://github.com/NixOS/nixpkgs/issues/164775
+  dontCheckPython = drv: drv.overridePythonAttrs (old: { doCheck = false; });
+  # Keep python3 instead of specific python version for flexibility based on nixpkgs pin
+  pythonEnv = pkgs.python3.withPackages (ps: [
+    (dontCheckPython ps.magic-wormhole-mailbox-server)
+  ]);
+  contents = with pkgs; [ bash coreutils procps pythonEnv ];
 in
 pkgs.dockerTools.buildImage {
   inherit contents;
