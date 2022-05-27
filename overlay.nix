@@ -7,4 +7,5 @@ self: super:
   sshcb = super.callPackage ./pkgs/sshcb { };
   term-apply = super.callPackage ./pkgs/term-apply { };
   terraform-config-inspect = super.callPackage ./pkgs/terraform-config-inspect { };
+  upgrade-eks-workers = super.callPackage ./pkgs/upgrade-eks-workers { };
 }
