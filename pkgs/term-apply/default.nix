@@ -3,20 +3,20 @@
 let
   src = fetchFromGitHub {
     owner = "nebulaworks";
-    rev = "ffab245d1c0f21700bfece040f0749f797b751fc";
+    rev = "d446f5088690f2e824aeeca5b8bf32ad50236cb2";
     repo = "orion";
-    sha256 = "sha256:1zvidyhvi9hdn3jl9lb98j1gs92f44n024y08l39vzkdg52g3wcw";
+    sha256 = "sha256:0y0krlzrpgrlrm6rg2s7zims3s0g6jwqjj8r4hyp8f9p3z52liy0";
   };
 
 in
 buildGoModule rec {
   inherit src;
   pname = "term-apply-unstable";
-  version = "2022-06-20";
+  version = "2022-07-05";
 
   sourceRoot = "${src.name}/apps/term-apply";
 
-  vendorSha256 = "sha256-pZs/MQcCflfpJ820c1Genkk+kT8/2qqwS0bO8oQ3Utg=";
+  vendorSha256 = "sha256-OX7aXXnFLNCsux+sHzOkwxx0zBe7XwbHhWIgXRQtUYU=";
 
   ldflags = [
     "-X github.com/nebulaworks/orion/apps/term-apply/pkg/version.Commit=${src.rev}"
