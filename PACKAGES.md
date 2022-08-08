@@ -16,7 +16,7 @@
 
 4. In the root directory of the repository run `nix-build -A pkgs.<Package Name>`
 
-5. **IF USING GOLANG** In the resulting error message, copy the hash marked `got:` and paste it into the `venderSha256` field of `buildGoModule`
+5. **IF USING GOLANG** In the resulting error message, copy the hash marked `got:` and paste it into the `venderSha256` field of `buildGoModule` and update the version to the current date.
 
 ## Publishing your update
 
