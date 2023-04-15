@@ -8,7 +8,7 @@ on:
 jobs:
   upstream_nixpkgs:
     name: 'Build images off master'
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     # Utilizing nixos/nix docker image v2.7.0
     container:
       image: nixos/nix@sha256:fc55b9bf9f61742a3fc262c0dc9ad62ea8ace014bb5bd4b11341da879e7b26ce

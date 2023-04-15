@@ -18,7 +18,7 @@ on:
 jobs:
   verify:
     name: Verify commenter
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     # Checks if the comment contains the word 'publish as well as if the comment was made in a PR
     if: >
